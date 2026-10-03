@@ -1,0 +1,19 @@
+Heurekaprotocols — Public Wet-Lab Protocols from Heureka Labs
+
+This repository is dual-licensed:
+
+  - Source code (validation scripts, schemas and build tooling) is licensed
+    under the Apache License, Version 2.0. See LICENSE-APACHE-2.0 for the full
+    text, or visit http://www.apache.org/licenses/LICENSE-2.0
+
+  - Protocol and documentation content (protocol.md files, variant files and
+    README files) is licensed under the Creative Commons Attribution 4.0
+    International License (CC-BY-4.0). See LICENSE-CC-BY-4.0 for the full
+    text, or visit https://creativecommons.org/licenses/by/4.0/
+
+SPDX-License-Identifier: Apache-2.0 OR CC-BY-4.0
+
+Copyright (c) 2026 Heureka Labs, Inc.
+
+Content adapted from third-party sources is redistributed under the licence
+that governs it, named in that page's `license` field. See NOTICE.
