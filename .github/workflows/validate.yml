@@ -1,0 +1,27 @@
+name: Validate protocols
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0   # check-versions.js needs the merge base
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+      - run: npm ci
+      - name: Validate protocol pages
+        run: npm run validate
+      - name: Every changed page carries a version bump
+        if: github.event_name == 'pull_request'
+        run: npm run check-versions
+        env:
+          BASE_REF: ${{ github.event.pull_request.base.sha }}

@@ -1,0 +1,47 @@
+name: Protocol request
+description: Ask for a protocol, or offer one you published
+title: "[protocol-request] "
+labels: ["protocol-request"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Ask for a protocol we don't have yet, a variant for your organism or setup, or offer a
+        protocol you published so it can be credited to you.
+
+        Every page cites its sources at each step, and the people who originated a protocol are
+        credited first. Requests are answered on this issue, so watch it for updates.
+  - type: dropdown
+    id: kind
+    attributes:
+      label: What is this?
+      options:
+        - A protocol we don't have
+        - A variant of an existing protocol (another organism, sample, scale or kit)
+        - My own published protocol, to be added and credited
+    validations:
+      required: true
+  - type: input
+    id: what
+    attributes:
+      label: Method and context
+      description: The method, and what it is for — organism, sample, scale, equipment.
+      placeholder: CRISPR knock-in of a GFP tag in C. elegans by gonad injection
+    validations:
+      required: true
+  - type: input
+    id: source
+    attributes:
+      label: Source (DOI or URL)
+      description: The paper or protocol it comes from. A protocol works here because it is cited.
+      placeholder: https://doi.org/...
+  - type: input
+    id: credit
+    attributes:
+      label: Credit (if this is your protocol)
+      description: Name, and ORCID iD if you have one, exactly as you want it shown.
+  - type: textarea
+    id: details
+    attributes:
+      label: Details
+      description: What makes this version different, what tends to go wrong, anything else useful.
