@@ -7,7 +7,7 @@ body:
     attributes:
       value: |
         Ask for a protocol we don't have yet, a variant for your organism or setup, or offer a
-        protocol you published so it can be credited to you.
+        protocol you published so it can be credited to you as a source for the recipes built from it.
 
         Every page cites its sources at each step, and the people who originated a protocol are
         credited first. Requests are answered on this issue, so watch it for updates.

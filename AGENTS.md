@@ -1,7 +1,11 @@
-# Writing a protocol
+# Contributing a protocol
 
-The standard for every page in this repository, for people and agents alike. `npm run validate`
-enforces the parts a machine can check. The rest is on the author.
+The standard for every protocol contributed to this repository, for people and agents alike.
+`npm run validate` enforces the parts a machine can check. The rest is on the author.
+
+A contributed protocol is published here under its contributor's name. Heureka Protocols then uses
+it as a credited source, alongside the other published protocols for the same method, when it
+builds the recipe for that method.
 
 ## 1. The recipe model
 
@@ -9,16 +13,13 @@ Protocols are recipes. Keep the analogy close.
 
 - **A recipe is a starting point, not a law.** A cook who doesn't like tomatoes leaves them off the
   hamburger, and it is still a hamburger. A scientist who swaps a buffer, scales to a 96-well plate
-  or skips an optional wash is still running the protocol. Pages are written to be adapted.
+  or skips an optional wash is still running the protocol. Protocols are written to be adapted.
 - **Some ingredients are the dish.** Leave out the beef and it isn't a hamburger. Leave out the
   transposase and it isn't CUT&Tag. Mark what the method depends on as `critical`, and say why.
-- **Bespoke is normal.**
-  - The canonical page is the base recipe.
-  - Variants are the well-known versions for a context.
-  - Every lab's own version is legitimate.
+- **Bespoke is normal.** Your lab's version is a legitimate protocol, and so is everyone else's.
+  Contribute the version you actually run, for the context you run it in.
 - **A recipe works once someone has cooked it and someone has ordered it.** A protocol here works
-  because it comes from a published, cited source. We stand behind the citation, not behind having
-  run it ourselves.
+  because it comes from a published, cited source: usually your own paper.
 - **Credit the original cook.** The people and papers a protocol came from are cited first.
 
 ## 2. The two tests
@@ -27,13 +28,14 @@ Every page passes both.
 
 **Validity: every step traces to a reference.**
 - Every step, and every amount, time, temperature, speed and cycle count in it, cites a source.
-- Where a value comes from comparing sources, say so: `1 h (9 of 12 sources); overnight in 3 [3,7,11]`.
+  Usually that is the paper your protocol was published in; cite others where a step comes from
+  them.
 - Reagents carry an RRID or a vendor catalog number. Kits carry the vendor's document id and
   revision. Organisms carry their NCBI Taxonomy id.
 - The **Principle** section explains the mechanism: what each enzyme does, where it acts, and what
   ends up where on the molecule.
 
-**Utility: the page says what it is for.** Each page declares one context:
+**Utility: the protocol says what it is for.** Each protocol declares one context:
 
 | Field | Vocabulary | Example |
 |---|---|---|
@@ -51,7 +53,7 @@ When a change of context changes the steps, write a **variant**, not a footnote.
 
 ```
 protocols/<method>/
-  protocol.md              # the canonical page
+  protocol.md              # the method's protocol
   variants/<variant>.md    # context variants
   seqspec.yaml             # required when readout includes sequencing
   figures/                 # optional: .svg or .png
@@ -100,7 +102,7 @@ supersedes: null
 | `contributors` | at least one; each has `name` and `role` (`originator` · `author` · `adapter`); `orcid` optional |
 | `license` | one of: `CC-BY-4.0`, `CC0-1.0`, `MIT`, `BSD-2-Clause`, `BSD-3-Clause`, `Apache-2.0` |
 | `safety.biosafety_level` | 1 or 2 |
-| variants only | `parent: <method>@<version>`, naming the canonical page and the version it differs from |
+| variants only | `parent: <method>@<version>`, naming the method's protocol.md and the version it differs from |
 
 ## 5. Body: required sections, in this order
 
@@ -144,11 +146,13 @@ Load the needle with … (prose explains; the step line carries the quantities)
 
 ## 7. Variants
 
-A variant is the canonical page for a different context: another organism, sample, scale or kit.
+A variant is the same method for a different context: another organism, sample, scale or kit.
+Contribute one when you run a method that is already here, and your context changes its steps.
 
 - It is a complete page, readable on its own, with its own `context`.
 - It names `parent: <method>@<version>`.
 - It keeps the parent's step ids wherever the step is the same, so the two compare cleanly.
+- Its `contributors` credit the parent's originators as well as you.
 
 ## 8. Versioning
 
@@ -163,8 +167,10 @@ Every page carries its own semver, starting at `1.0.0`.
 ## 9. Sources and licences
 
 **Whose text is it?**
-- **Original:** you wrote the page from the facts. It is `CC-BY-4.0`. Steps, amounts and timings
-  are facts; restating them in your own words is original work.
+- **Original:** you wrote it, from your own work or from the facts. It is `CC-BY-4.0`, credited to
+  you. Steps, amounts and timings are facts; restating them in your own words is original work.
+  Contributing a protocol from your own paper is the usual case: check that your publisher's
+  agreement leaves you free to publish the method text under CC BY, or write it fresh.
 - **Adapted:** you reused a source's own prose, structure or worked examples, including by
   rewording them.
   - Mark that source `relation: adapted`.
@@ -179,8 +185,10 @@ Every page carries its own semver, starting at `1.0.0`.
 ## 10. Credit
 
 - **Originators first:** the people and papers a protocol came from, then everyone else.
-- A contributor who promotes their own protocol is credited by name (and ORCID, if given) as
+- A contributor who publishes their own protocol is credited by name (and ORCID, if given) as
   `originator`.
+- That credit travels. Every recipe on Heureka Protocols built from your protocol cites you as a
+  source, and your originator page shows your protocols and how often they have been adapted.
 - A variant carries its parent's originators forward in its own `contributors`.
 
 ## 11. Safety and scope
@@ -208,4 +216,4 @@ CI runs both on every pull request.
 ## 13. This repository is public, including its history
 
 Every commit, branch, commit message and pull request here is public, permanently. Deleting a file
-in a later commit does not remove it from history. Get a page right before you push it.
+in a later commit does not remove it from history. Get a protocol right before you push it.
