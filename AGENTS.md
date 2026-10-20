@@ -141,8 +141,9 @@ Load the needle with … (prose explains; the step line carries the quantities)
   `wash`, `bind`, `elute`, `amplify`, `purify`, `inject`, `transform`, `transfect`, `fix`,
   `permeabilize`, `lyse`, `stain`, `image`, `measure`, `sequence`, `store`, `pause`.
 - **It carries the quantities, with units, and their citations** as `[n]` or `[n,m]`, matching
-  `sources` ids. Separate items with ` · `; every item that states a number carries its own
-  citation.
+  `sources` ids. Separate items with ` · `; every item that states a quantity (a number with a unit, or a
+  ratio such as 1:100) carries its own citation. A reagent name alone, such as `pA-Tn5`, needs
+  none. Cite counts too ("10 adults"); the check does not recognise a number without a unit.
 - **Critical steps** add `· critical: <why>`.
 - **Prose never states a quantity the step line does not.**
 

@@ -19,6 +19,13 @@ export const compareVersions = (a, b) => {
   return 0;
 };
 
+// A quantity on a step line: a number standing on its own (not part of a name such as Cas9,
+// Tn5 or H3K27me3) followed by a unit, or a ratio such as 1:100. Names like Tween 20 carry no
+// unit and are not quantities. A unitless count ("10 adults") is not recognised.
+const UNIT = String.raw`(?:[µuμ]L|mL|nL|pL|L|[µuμ]g|ng|mg|pg|kg|g|[µuμ]M|nM|mM|pM|M|[mµunp]?mol|%|°C|℃|°|hrs?|hours?|h|mins?|minutes?|min|sec|seconds?|s|days?|d|weeks?|wk|w|rpm|[×xX]\s*g|[×xX]|cycles?|bp|kb|nt|units?|U|cells?|reactions?|wells?|[cmµun]m|kDa|V|mA)`;
+export const QUANTITY_RE = new RegExp(
+  String.raw`(?<![A-Za-z0-9.])\d+(?:[.,]\d+)?(?:\s*[–-]\s*\d+(?:[.,]\d+)?)?\s*(?:${UNIT}(?![A-Za-z])|:\s*\d)`, 'u');
+
 export const LICENSES = new Set([
   'CC-BY-4.0', 'CC0-1.0', 'MIT', 'BSD-2-Clause', 'BSD-3-Clause', 'Apache-2.0',
 ]);

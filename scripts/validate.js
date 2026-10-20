@@ -8,7 +8,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import yaml from 'js-yaml';
 import {
-  ROOT, PROTOCOLS, SLUG_RE, VERSION_RE, PARENT_RE, compareVersions, LICENSES, SOURCE_RELATIONS,
+  ROOT, PROTOCOLS, SLUG_RE, VERSION_RE, PARENT_RE, QUANTITY_RE, compareVersions, LICENSES, SOURCE_RELATIONS,
   CONTRIBUTOR_ROLES, SCALES, READOUTS, ACTIONS, SECTIONS, SEQUENCING_ONLY, ALLOWED_EXTS,
   MAX_FILE_BYTES, MAX_METHOD_BYTES, MAX_SUMMARY, parsePage, listPages, walk,
 } from './lib.js';
@@ -201,11 +201,11 @@ function checkBody(page, body, { sourceIds, sequencing }) {
       if (action[1] !== 'pause' && citationsIn(line).length === 0) {
         fail(at, `step #${id}: the step line must cite its source, e.g. [1]`);
       }
-      // Every quantity cites: each `·` segment that states a number carries its own [n].
+      // Every quantity cites: each `·` segment that states a quantity carries its own [n].
       for (const seg of line.replace(/^`[a-z-]+`/, '').split('·').map((x) => x.trim())) {
         if (!seg || /^critical:/.test(seg)) continue;
         const bare = seg.replace(/\[\d+(?:\s*,\s*\d+)*\]/g, '');
-        if (/\d/.test(bare) && citationsIn(seg).length === 0) {
+        if (QUANTITY_RE.test(bare) && citationsIn(seg).length === 0) {
           fail(at, `step #${id}: "${seg}" states a quantity without a citation`);
         }
       }
