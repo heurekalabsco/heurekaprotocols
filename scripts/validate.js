@@ -8,7 +8,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import yaml from 'js-yaml';
 import {
-  ROOT, PROTOCOLS, SLUG_RE, VERSION_RE, PARENT_RE, LICENSES, SOURCE_RELATIONS,
+  ROOT, PROTOCOLS, SLUG_RE, VERSION_RE, PARENT_RE, compareVersions, LICENSES, SOURCE_RELATIONS,
   CONTRIBUTOR_ROLES, SCALES, READOUTS, ACTIONS, SECTIONS, SEQUENCING_ONLY, ALLOWED_EXTS,
   MAX_FILE_BYTES, MAX_METHOD_BYTES, MAX_SUMMARY, parsePage, listPages, walk,
 } from './lib.js';
@@ -116,7 +116,7 @@ function checkFrontmatter(page, fm) {
     else if (sourceIds.has(s.id)) fail(at, `${where}.id ${s.id} is duplicated`);
     else sourceIds.add(s.id);
     if (!nonEmpty(s.doi) && !nonEmpty(s.url)) fail(at, `${where} needs a doi or url`);
-    if (!nonEmpty(s.licence)) fail(at, `${where}.licence is required (use "all-rights-reserved" for closed sources)`);
+    if (!nonEmpty(s.license)) fail(at, `${where}.license is required (use "all-rights-reserved" for closed sources)`);
     if (!SOURCE_RELATIONS.has(s.relation)) {
       fail(at, `${where}.relation must be one of: ${[...SOURCE_RELATIONS].join(', ')}`);
     }
@@ -126,10 +126,10 @@ function checkFrontmatter(page, fm) {
   if (!LICENSES.has(fm.license)) fail(at, `license must be one of: ${[...LICENSES].join(', ')}`);
   const adapted = sources.filter((s) => isObj(s) && s.relation === 'adapted');
   for (const s of adapted) {
-    if (!LICENSES.has(s.licence)) {
-      fail(at, `source ${s.id} is adapted but its licence "${s.licence}" is not one we can redistribute`);
-    } else if (s.licence !== fm.license) {
-      fail(at, `source ${s.id} is adapted under ${s.licence}, so license must be ${s.licence}, not ${fm.license}`);
+    if (!LICENSES.has(s.license)) {
+      fail(at, `source ${s.id} is adapted but its license "${s.license}" is not one we can redistribute`);
+    } else if (s.license !== fm.license) {
+      fail(at, `source ${s.id} is adapted under ${s.license}, so license must be ${s.license}, not ${fm.license}`);
     }
   }
 
@@ -157,6 +157,7 @@ function checkFrontmatter(page, fm) {
   if (fm.supersedes != null && !SLUG_RE.test(String(fm.supersedes))) fail(at, 'supersedes must be a method slug or null');
 
   return { sourceIds, adapted: adapted.length > 0,
+           parentVersion: page.kind === 'variant' ? String(fm.parent ?? '').match(PARENT_RE)?.[2] : null,
            sequencing: isObj(ctx) && asList(ctx.readout).includes('sequencing') };
 }
 
@@ -174,6 +175,7 @@ function checkBody(page, body, { sourceIds, sequencing }) {
 
   // Steps: every level-3 heading under ## Steps has a stable anchor and a step line.
   const h2 = hs.filter((h) => h.level === 2);
+  let stepIds = new Set();
   const stepsIdx = h2.findIndex((h) => h.text === 'Steps');
   if (stepsIdx !== -1) {
     const start = h2[stepsIdx].line;
@@ -199,6 +201,26 @@ function checkBody(page, body, { sourceIds, sequencing }) {
       if (action[1] !== 'pause' && citationsIn(line).length === 0) {
         fail(at, `step #${id}: the step line must cite its source, e.g. [1]`);
       }
+      // Every quantity cites: each `·` segment that states a number carries its own [n].
+      for (const seg of line.replace(/^`[a-z-]+`/, '').split('·').map((x) => x.trim())) {
+        if (!seg || /^critical:/.test(seg)) continue;
+        const bare = seg.replace(/\[\d+(?:\s*,\s*\d+)*\]/g, '');
+        if (/\d/.test(bare) && citationsIn(seg).length === 0) {
+          fail(at, `step #${id}: "${seg}" states a quantity without a citation`);
+        }
+      }
+    }
+    stepIds = ids;
+  }
+
+  // Troubleshooting names the steps it concerns as #step-id; each must exist.
+  const tsIdx = h2.findIndex((h) => h.text === 'Troubleshooting');
+  if (tsIdx !== -1) {
+    const start = h2[tsIdx].line;
+    const end = tsIdx + 1 < h2.length ? h2[tsIdx + 1].line : lines.length;
+    const text = lines.slice(start + 1, end).join('\n');
+    for (const m of text.matchAll(/(?<![#\w{])#([a-z0-9-]+)/g)) {
+      if (!stepIds.has(m[1])) fail(at, `Troubleshooting refers to #${m[1]}, which is not a step id`);
     }
   }
 
@@ -250,6 +272,8 @@ function checkFiles() {
 const notice = fs.existsSync(path.join(ROOT, 'NOTICE')) ? fs.readFileSync(path.join(ROOT, 'NOTICE'), 'utf8') : '';
 const pages = listPages();
 const sequencingMethods = new Set();
+const canonicalVersions = new Map();
+const variantParents = [];
 
 for (const page of pages) {
   const parsed = parsePage(fs.readFileSync(page.file, 'utf8'));
@@ -259,6 +283,16 @@ for (const page of pages) {
   if (facts.sequencing) sequencingMethods.add(page.method);
   if (facts.adapted && !notice.includes(page.rel)) {
     fail(page.rel, 'adapts third-party text, so it must be listed in NOTICE');
+  }
+  if (page.kind === 'canonical') canonicalVersions.set(page.method, String(parsed.fm.version ?? ''));
+  else if (facts.parentVersion) variantParents.push({ page, version: facts.parentVersion });
+}
+
+// A variant names a parent version that has existed: no later than the parent's current one.
+for (const { page, version } of variantParents) {
+  const current = canonicalVersions.get(page.method);
+  if (current && VERSION_RE.test(current) && compareVersions(version, current) > 0) {
+    fail(page.rel, `parent ${page.method}@${version} is later than ${page.method}'s current version ${current}`);
   }
 }
 

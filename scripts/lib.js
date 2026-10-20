@@ -12,6 +12,13 @@ export const SLUG_RE = /^[a-z0-9-]+$/;
 export const VERSION_RE = /^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)$/;
 export const PARENT_RE = /^([a-z0-9-]+)@((?:0|[1-9]\d*)\.(?:0|[1-9]\d*)\.(?:0|[1-9]\d*))$/;
 
+// Negative, zero or positive as semver a is before, equal to or after b.
+export const compareVersions = (a, b) => {
+  const [x, y] = [a.split('.').map(Number), b.split('.').map(Number)];
+  for (let i = 0; i < 3; i += 1) if (x[i] !== y[i]) return x[i] - y[i];
+  return 0;
+};
+
 export const LICENSES = new Set([
   'CC-BY-4.0', 'CC0-1.0', 'MIT', 'BSD-2-Clause', 'BSD-3-Clause', 'Apache-2.0',
 ]);

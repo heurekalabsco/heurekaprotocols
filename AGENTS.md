@@ -83,7 +83,7 @@ reagents:
   - {id: anti-gfp, name: anti-GFP antibody, role: antibody, rrid: AB_0000000}
 kit_documents: []
 sources:
-  - {id: 1, doi: 10.0000/example, licence: CC-BY-4.0, relation: primary}
+  - {id: 1, doi: 10.0000/example, license: CC-BY-4.0, relation: primary}
 contributors:
   - {name: Jane Doe, orcid: 0000-0000-0000-0000, role: originator}
 license: CC-BY-4.0
@@ -98,7 +98,7 @@ supersedes: null
 | `context.organism` | at least one, each with an integer `taxon` |
 | `reagents` | each has `id`, `name`, `role`, and an `rrid` or a `source` with `vendor` and `catalog`. `critical: true` marks an ingredient the method depends on |
 | `kit_documents` | `{vendor, document, revision}` for every vendor kit protocol relied on |
-| `sources` | at least one; each has a unique integer `id`, a `doi` or `url`, its `licence`, and a `relation`: `primary` · `adapted` · `cited` · `variant` |
+| `sources` | at least one; each has a unique integer `id`, a `doi` or `url`, its `license`, and a `relation`: `primary` · `adapted` · `cited` · `variant` |
 | `contributors` | at least one; each has `name` and `role` (`originator` · `author` · `adapter`); `orcid` optional |
 | `license` | one of: `CC-BY-4.0`, `CC0-1.0`, `MIT`, `BSD-2-Clause`, `BSD-3-Clause`, `Apache-2.0` |
 | `safety.biosafety_level` | 1 or 2 |
@@ -120,7 +120,8 @@ supersedes: null
 ```
 
 - **Materials** is a Key Resources Table: reagent, role, source, identifier, citation.
-- **Troubleshooting** entries name the step ids they concern.
+- **Troubleshooting** entries name the steps they concern as `#step-id`, and each must be a step on
+  the page.
 - **References** lists every `sources` entry by its `id`.
 
 ## 6. Steps
@@ -140,7 +141,8 @@ Load the needle with … (prose explains; the step line carries the quantities)
   `wash`, `bind`, `elute`, `amplify`, `purify`, `inject`, `transform`, `transfect`, `fix`,
   `permeabilize`, `lyse`, `stain`, `image`, `measure`, `sequence`, `store`, `pause`.
 - **It carries the quantities, with units, and their citations** as `[n]` or `[n,m]`, matching
-  `sources` ids.
+  `sources` ids. Separate items with ` · `; every item that states a number carries its own
+  citation.
 - **Critical steps** add `· critical: <why>`.
 - **Prose never states a quantity the step line does not.**
 
@@ -150,7 +152,7 @@ A variant is the same method for a different context: another organism, sample, 
 Contribute one when you run a method that is already here, and your context changes its steps.
 
 - It is a complete page, readable on its own, with its own `context`.
-- It names `parent: <method>@<version>`.
+- It names `parent: <method>@<version>`, no later than the parent's current version.
 - It keeps the parent's step ids wherever the step is the same, so the two compare cleanly.
 - Its `contributors` credit the parent's originators as well as you.
 

@@ -10,7 +10,7 @@
 import { execFileSync } from 'node:child_process';
 import fs from 'node:fs';
 import path from 'node:path';
-import { ROOT, VERSION_RE, splitFrontmatter } from './lib.js';
+import { ROOT, VERSION_RE, compareVersions, splitFrontmatter } from './lib.js';
 
 const base = process.argv[2] || process.env.BASE_REF || 'origin/main';
 
@@ -25,13 +25,15 @@ const git = (...args) => {
 };
 
 // Tell "not there at the base" apart from "git failed", so a failure never waves a page
-// through as new.
+// through as new. ls-tree prints nothing for a path absent at ref and exits non-zero only
+// when git itself fails.
 const existsAt = (ref, file) => {
   try {
-    execFileSync('git', ['cat-file', '-e', `${ref}:${file}`], { cwd: ROOT, stdio: 'ignore' });
-    return true;
+    return execFileSync('git', ['ls-tree', '--name-only', ref, '--', file],
+      { cwd: ROOT, encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] }).trim() !== '';
   } catch {
-    return false;
+    console.error(`git could not read ${file} at ${ref}; refusing to treat it as new.`);
+    process.exit(2);
   }
 };
 
@@ -48,12 +50,6 @@ const versionOf = (text) => {
   const parts = splitFrontmatter(text);
   if (!parts) return null;
   return (parts.raw.match(/^version:\s*['"]?(\S+?)['"]?\s*$/m) || [])[1] || null;
-};
-
-const cmp = (a, b) => {
-  const [x, y] = [a.split('.').map(Number), b.split('.').map(Number)];
-  for (let i = 0; i < 3; i += 1) if (x[i] !== y[i]) return x[i] - y[i];
-  return 0;
 };
 
 // Map each changed file to the page whose version must move.
@@ -84,7 +80,7 @@ for (const page of [...pages].sort()) {
   checked += 1;
   if (!now || !VERSION_RE.test(now)) { errors.push(`${page}: version "${now}" is not semver`); continue; }
   if (!was || !VERSION_RE.test(was)) continue;             // nothing valid to compare against
-  const d = cmp(now, was);
+  const d = compareVersions(now, was);
   if (d === 0) errors.push(`${page}: content changed but version is still ${now}`);
   else if (d < 0) errors.push(`${page}: version went backwards, ${was} → ${now}`);
 }
